@@ -1,0 +1,23 @@
+# CLion
+.idea/
+
+# CMake
+cmake-build-*/
+
+# Compiled files
+*.o
+*.obj
+*.exe
+*.out
+
+# Libraries
+*.a
+*.so
+*.dll
+
+# Debug
+*.dSYM/
+
+# OS
+.DS_Store
+Thumbs.db
