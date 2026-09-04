@@ -1,9 +1,12 @@
 #pragma once
 #include "core.h"
+#include "bitboard.h"
+#include "state_info.h"
+#include "state_buffer.h"
+
 #include <array>
 #include <cstddef>
 
-#include "bitboard.h"
 
 /*
  * POSITION BOARD REPRESENTATION
@@ -15,16 +18,6 @@
  */
 
 constexpr std::size_t ALL_PIECES = 0;
-
-struct StateInfo
-{
-    CastlingRights castlingRights;
-    Square enPassantSquare;
-    std::int16_t halfmoveClock;
-    Piece capturedPiece;
-
-    // later on hashId, cache info ...
-};
 
 class Position
 {
