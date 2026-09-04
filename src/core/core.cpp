@@ -1,10 +1,10 @@
 #include "core.h"
 #include <string>
 
-std::string getSquareName(Square sq)
+std::string getSquareName(Square square)
 {
-    std::uint8_t rank = getRankOf(sq);
-    std::uint8_t file = getFileOf(sq);
+    std::uint8_t rank = getRankOf(square);
+    std::uint8_t file = getFileOf(square);
 
     char fileName = static_cast<char>('a' + file);
     char rankName = static_cast<char>('1' + rank);
@@ -12,18 +12,18 @@ std::string getSquareName(Square sq)
     return std::string{fileName, rankName};
 }
 
-std::string getMoveToString(Move m)
+std::string getMoveToString(Move move)
 {
-    Square from = getFromSq(m);
-    Square to = getToSq(m);
+    Square from = getFromSq(move);
+    Square to = getToSq(move);
 
     std::string result = getSquareName(from) + getSquareName(to);
 
-    MoveType type = getType(m);
+    MoveType type = getType(move);
 
     if (isPromotion(type))
     {
-        std::uint8_t data = getData(m);
+        std::uint8_t data = getData(move);
         char promotionPiece;
 
         switch (data)
