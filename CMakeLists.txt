@@ -9,4 +9,6 @@ add_executable(mobius
         src/main.cpp
         src/core/core.h
         src/core/core.cpp
+        src/core/bitboard.h
+        src/core/position.h
 )
