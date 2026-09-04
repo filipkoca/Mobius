@@ -16,14 +16,26 @@
 
 constexpr std::size_t ALL_PIECES = 0;
 
+struct StateInfo
+{
+    CastlingRights castlingRights;
+    Square enPassantSquare;
+    std::int16_t halfmoveClock;
+    Piece capturedPiece;
+
+    // later on hashId, cache info ...
+};
+
 class Position
 {
 private:
-    std::array<Piece, 64> board{};      // 64B
-    std::array<Bitboard, 8> typesBB{};  // 64B
-    std::array<Bitboard, 2> colorsBB{}; // 16B
-    Color sideToMove = Color::White;    // 1B
-                                        // = 145B -> 152B with padding
+    std::array<Piece, 64> board{};
+    std::array<Bitboard, 8> typesBB{};
+    std::array<Bitboard, 2> colorsBB{};
+
+    Color sideToMove = Color::White;
+
+    StateInfo* state = nullptr;
 
 public:
     Piece pieceAt(Square square) const
