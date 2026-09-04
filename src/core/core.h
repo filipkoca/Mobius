@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 // BITBOARD
 using Bitboard = std::uint64_t;
@@ -119,8 +120,8 @@ constexpr std::uint8_t getData(Move m) {
     return static_cast<uint8_t>(m >> MOVE_DATA_SHIFT) & TWO_LS_BITS_MASK;
 }
 
-constexpr std::uint8_t getType(Move m) {
-    return static_cast<uint8_t>(m >> MOVE_TYPE_SHIFT) & TWO_LS_BITS_MASK;
+constexpr MoveType getType(Move m) {
+    return static_cast<MoveType>(m >> MOVE_TYPE_SHIFT);
 }
 
 // CASTLING RIGHTS
@@ -137,6 +138,10 @@ constexpr CastlingRights WHITE_CASTLING  = 0b0011;
 constexpr CastlingRights BLACK_CASTLING  = 0b1100;
 
 constexpr CastlingRights ALL_CASTLING    = 0b1111;
+
+//DECLARATIONS
+std::string getSquareName(Square sq);
+std::string getMoveToString(Square sq);
 
 // check if compiler understands that i aint playin ...
 static_assert(sizeof(Bitboard) == 8);
