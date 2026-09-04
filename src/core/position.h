@@ -14,6 +14,8 @@
  *
  */
 
+constexpr std::size_t ALL_PIECES = 0;
+
 class Position
 {
 private:
