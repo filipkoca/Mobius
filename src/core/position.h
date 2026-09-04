@@ -2,7 +2,6 @@
 #include "core.h"
 #include "bitboard.h"
 #include "state_info.h"
-#include "state_buffer.h"
 
 #include <array>
 #include <cstddef>
@@ -68,6 +67,21 @@ public:
     Color getSideToMove() const
     {
         return sideToMove;
+    }
+
+    void setSideToMove(Color color)
+    {
+        sideToMove = color;
+    }
+
+    StateInfo& getState() const
+    {
+        return *state;
+    }
+
+    void setState(StateInfo& newState)
+    {
+        state = &newState;
     }
 
     void setPiece(Piece piece, Square square);

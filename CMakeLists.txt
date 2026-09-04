@@ -11,4 +11,7 @@ add_executable(mobius
         src/core/core.cpp
         src/core/bitboard.h
         src/core/position.h
+        src/core/position.cpp
+        src/core/state_buffer.h
+        src/core/state_info.h
 )
