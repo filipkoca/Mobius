@@ -37,7 +37,7 @@ public:
 
     Bitboard pieces() const
     {
-        return typesBB[0];
+        return typesBB[ALL_PIECES];
     }
 
     Bitboard pieces(Color color) const
@@ -57,11 +57,11 @@ public:
 
     bool isOccupied(Square square) const
     {
-        return isBitSet(typesBB[0], square);
+        return isBitSet(typesBB[ALL_PIECES], square);
     }
     bool isEmpty(Square square) const
     {
-        return !isBitSet(typesBB[0], square);
+        return !isBitSet(typesBB[ALL_PIECES], square);
     }
 
     Color getSideToMove() const
@@ -74,7 +74,7 @@ public:
         sideToMove = color;
     }
 
-    StateInfo& getState() const
+    StateInfo& getState()
     {
         return *state;
     }

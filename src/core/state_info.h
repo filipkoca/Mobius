@@ -3,10 +3,10 @@
 
 struct StateInfo
 {
-    CastlingRights castlingRights;
-    Square enPassantSquare;
-    std::uint16_t halfmoveClock;
-    Piece capturedPiece;
+    CastlingRights castlingRights = NO_CASTLING;
+    Square enPassantSquare = NO_SQUARE;
+    std::uint16_t halfmoveClock = 0;
+    Piece capturedPiece = NO_PIECE;
 
     // later on hashId, cache info ...
 };

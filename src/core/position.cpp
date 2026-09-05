@@ -6,7 +6,7 @@ void Position::setPiece(Piece piece, Square square)
     Color pieceColor = getPieceColor(piece);
     Bitboard mask = getBit(square);
 
-    typesBB[0] |= mask;
+    typesBB[ALL_PIECES] |= mask;
     typesBB[static_cast<std::size_t>(pieceType)] |= mask;
     colorsBB[static_cast<std::size_t>(pieceColor)] |= mask;
     board[square] = piece;
