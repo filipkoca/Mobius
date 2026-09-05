@@ -12,7 +12,6 @@ void Position::setPiece(Piece piece, Square square)
     board[square] = piece;
 }
 
-
 void Position::removePiece(Square square)
 {
     Piece piece = board[square];
@@ -106,4 +105,233 @@ bool Position::isValid() const
     }
 
     return true;
+}
+
+void Position::makeMove(Move move, StateInfo& newState)
+{
+    // decode move
+    Square from = getFromSq(move);
+    Square to = getToSq(move);
+    MoveType moveType = getType(move);
+
+    Piece movingPiece = board[from];
+    PieceType movingType = getPieceType(movingPiece);
+
+    newState = *state;
+
+    newState.capturedPiece = NO_PIECE;
+    newState.enPassantSquare = NO_SQUARE;
+
+    // ======================================
+    //  Update physical board
+    // ======================================
+
+    switch (moveType)
+    {
+        case MoveType::Normal:
+        {
+            Piece capturedPiece = board[to];
+            newState.capturedPiece = capturedPiece;
+
+            if (capturedPiece != NO_PIECE)
+            {
+                removePiece(to);
+            }
+
+            movePiece(from, to);
+
+            break;
+        }
+
+        case MoveType::Promotion:
+        {
+            PieceType promotionType = getPromotionType(move);
+            Piece promotionPiece = makePiece(sideToMove, promotionType);
+
+            if (!isEmpty(to))
+            {
+                newState.capturedPiece = board[to];
+                removePiece(to);
+            }
+
+            removePiece(from);
+            setPiece(promotionPiece, to);
+
+            break;
+        }
+
+        case MoveType::EnPassant:
+        {
+            std::int8_t dir = sideToMove == Color::White ? -1 : 1;
+            Square capturedPieceSquare = to + (8 * dir);
+
+            newState.capturedPiece = board[capturedPieceSquare];
+
+            removePiece(capturedPieceSquare);
+            movePiece(from, to);
+
+            break;
+        }
+
+        case MoveType::Castling:
+        {
+            Square oldRookSquare;
+            Square newRookSquare;
+
+            if (sideToMove == Color::White)
+            {
+                if (to == WHITE_KINGSIDE_CASTLE_TO)
+                {
+                    // K: 4 -> 6
+                    // R: 7 -> 5
+                    oldRookSquare = 7;
+                    newRookSquare = 5;
+                }
+
+                else // to == WHITE_QUEENSIDE_CASTLE_TO
+                {
+                    // K: 4 -> 2
+                    // R: 0 -> 3
+                    oldRookSquare = 0;
+                    newRookSquare = 3;
+                }
+            }
+            else //sideToMove == Color::Black
+            {
+                if (to == BLACK_KINGSIDE_CASTLE_TO)
+                {
+                    // k: 60 -> 62
+                    // r: 63 -> 61
+                    oldRookSquare = 63;
+                    newRookSquare = 61;
+                }
+
+                else // to == BLACK_QUEENSIDE_CASTLE_TO
+                {
+                    // k: 60 -> 58
+                    // r: 56 -> 59
+                    oldRookSquare = 56;
+                    newRookSquare = 59;
+                }
+            }
+
+            movePiece(from, to);
+            movePiece(oldRookSquare, newRookSquare);
+
+            break;
+        }
+    }
+
+    // ======================================
+    // Update castling rights
+    // ======================================
+
+    if (movingType == PieceType::King)
+    {
+        if (sideToMove == Color::White)
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~WHITE_CASTLING);
+        }
+        else
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~BLACK_CASTLING);
+        }
+    }
+
+    else if (movingType == PieceType::Rook)
+    {
+        if (from == 7)
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~WHITE_KING_SIDE);
+        }
+        else if (from == 0)
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~WHITE_QUEEN_SIDE);
+        }
+        else if (from == 63)
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~BLACK_KING_SIDE);
+        }
+        else if (from == 56)
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~BLACK_QUEEN_SIDE);
+        }
+    }
+
+    if (
+        newState.capturedPiece != NO_PIECE &&
+        getPieceType(newState.capturedPiece) == PieceType::Rook
+    )
+    {
+        if (to == 7)
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~WHITE_KING_SIDE);
+        }
+        else if (to == 0)
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~WHITE_QUEEN_SIDE);
+        }
+        else if (to == 63)
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~BLACK_KING_SIDE);
+        }
+        else if (to == 56)
+        {
+            newState.castlingRights &=
+                static_cast<CastlingRights>(~BLACK_QUEEN_SIDE);
+        }
+    }
+
+    // --------------------------------------------------
+    // Update en passant
+    // --------------------------------------------------
+
+    if (movingType == PieceType::Pawn)
+    {
+        if (
+            sideToMove == Color::White &&
+            to - from == 16
+        )
+        {
+            newState.enPassantSquare = to - 8;
+        }
+        else if (
+            sideToMove == Color::Black &&
+            from - to == 16
+        )
+        {
+            newState.enPassantSquare = to + 8;
+        }
+    }
+
+    // --------------------------------------------------
+    // Update halfmove clock
+    // --------------------------------------------------
+
+    if (
+       movingType == PieceType::Pawn ||
+       newState.capturedPiece != NO_PIECE
+   )
+    {
+        newState.halfmoveClock = 0;
+    }
+    else
+    {
+        ++newState.halfmoveClock;
+    }
+
+    sideToMove = sideToMove == Color::White
+        ? Color::Black
+        : Color::White;
+
+    state = &newState;
 }

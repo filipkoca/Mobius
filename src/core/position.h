@@ -30,6 +30,7 @@ private:
     StateInfo* state = nullptr;
 
 public:
+
     Piece pieceAt(Square square) const
     {
         return board[square];
@@ -39,17 +40,14 @@ public:
     {
         return typesBB[ALL_PIECES];
     }
-
     Bitboard pieces(Color color) const
     {
         return colorsBB[static_cast<std::size_t>(color)];
     }
-
     Bitboard pieces(PieceType pieceType) const
     {
         return typesBB[static_cast<std::size_t>(pieceType)];
     }
-
     Bitboard pieces(Color color, PieceType pieceType) const
     {
         return pieces(color) & pieces(pieceType);
@@ -68,7 +66,6 @@ public:
     {
         return sideToMove;
     }
-
     void setSideToMove(Color color)
     {
         sideToMove = color;
@@ -78,7 +75,6 @@ public:
     {
         return *state;
     }
-
     void setState(StateInfo& newState)
     {
         state = &newState;
@@ -88,7 +84,23 @@ public:
     void removePiece(Square square);
     void movePiece(Square from, Square to);
 
+    constexpr PieceType getPromotionType(Move move)
+    {
+        return static_cast<PieceType>(
+            getData(move) + static_cast<std::uint8_t>(PieceType::Knight)
+        );
+    }
+
     void clear();
     bool isValid() const;
+
+    void makeMove(Move move, StateInfo& newState);
+    void undoMove(Move move, StateInfo& previousState);
 };
+
+constexpr Square WHITE_KINGSIDE_CASTLE_TO = 6;
+constexpr Square WHITE_QUEENSIDE_CASTLE_TO = 2;
+constexpr Square BLACK_KINGSIDE_CASTLE_TO = 62;
+constexpr Square BLACK_QUEENSIDE_CASTLE_TO = 58;
+
 

@@ -66,6 +66,14 @@ constexpr Color getPieceColor(Piece piece)
     return static_cast<Color>(piece >> 3);
 }
 
+constexpr Piece makePiece(Color color, PieceType pieceType)
+{
+    return static_cast<Piece>(
+      static_cast<std::uint8_t>(color) << 3 |
+      static_cast<std::uint8_t>(pieceType)
+    );
+}
+
 
 /* MOVE uint16
  * +-----------------------------------------------------+
