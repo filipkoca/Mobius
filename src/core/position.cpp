@@ -76,7 +76,7 @@ bool Position::isValid() const
     {
         Piece piece = board[square];
 
-        if (isEmpty(piece))
+        if (isNoPiece(piece))
         {
             if (isBitSet(typesBB[ALL_PIECES], square))
             {

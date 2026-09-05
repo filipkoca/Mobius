@@ -51,7 +51,7 @@ constexpr Piece NO_PIECE = 0;
 constexpr std::uint8_t PIECE_TYPE_MASK = 0b00000111;
 constexpr std::uint8_t PIECE_COLOR_MASK = 0b00001000;
 
-constexpr bool isEmpty(Piece piece)
+constexpr bool isNoPiece(Piece piece)
 {
     return piece == NO_PIECE;
 }
