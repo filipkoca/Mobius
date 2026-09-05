@@ -14,4 +14,6 @@ add_executable(mobius
         src/core/position.cpp
         src/core/state_buffer.h
         src/core/state_info.h
+        src/core/fen_parser.cpp
+        src/core/fen_parser.h
 )
