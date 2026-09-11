@@ -143,7 +143,7 @@ void Position::makeMove(Move move, StateInfo& newState)
     Piece movingPiece = board[from];
     PieceType movingType = getPieceType(movingPiece);
 
-    // Copy current reversible state
+    // initiate StateInfo values
     newState = *state;
 
     newState.capturedPiece = NO_PIECE;
@@ -331,11 +331,23 @@ void Position::undoMove(Move move, StateInfo &previousState)
     {
         case MoveType::Normal:
         {
-            movePiece(to, from);
+            Piece movingPiece = board[to];
+            PieceType movingType = getPieceType(movingPiece);
+
+            Bitboard mask = getBit(from) | getBit(to);
+
+            board[to] = NO_PIECE;
+            board[from] = movingPiece;
+
+            typesBB[ALL_PIECES] ^= mask;
+            typesBB[static_cast<std::size_t>(movingType)] ^= mask;
+            colorsBB[static_cast<std::size_t>(sideToMove)] ^= mask;
+
             if (capturedPiece != NO_PIECE)
             {
                 setPiece(capturedPiece, to);
             }
+
             break;
         }
 
