@@ -1,4 +1,30 @@
 #include "position.h"
+#include <array>
+
+constexpr CastlingRights removeCastlingRights(CastlingRights rights)
+{
+    return static_cast<CastlingRights>(ALL_CASTLING & ~rights);
+}
+
+constexpr std::array<CastlingRights, 64> buildCastlingRightsMasks()
+{
+    std::array<CastlingRights, 64> masks = {};
+
+    masks.fill(ALL_CASTLING);
+
+    masks[0] = removeCastlingRights(WHITE_QUEEN_SIDE);
+    masks[4] = removeCastlingRights(WHITE_CASTLING);
+    masks[7] = removeCastlingRights(WHITE_KING_SIDE);
+
+    masks[56] = removeCastlingRights(BLACK_QUEEN_SIDE);
+    masks[60] = removeCastlingRights(BLACK_CASTLING);
+    masks[63] = removeCastlingRights(BLACK_KING_SIDE);
+
+    return masks;
+}
+
+constexpr std::array<CastlingRights, 64> CASTLING_RIGHTS_MASKS =
+    buildCastlingRightsMasks();
 
 void Position::setPiece(Piece piece, Square square)
 {
@@ -226,70 +252,10 @@ void Position::makeMove(Move move, StateInfo& newState)
     // Update castling rights
     // ======================================
 
-    if (movingType == PieceType::King)
-    {
-        if (sideToMove == Color::White)
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~WHITE_CASTLING);
-        }
-        else
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~BLACK_CASTLING);
-        }
-    }
-
-    else if (movingType == PieceType::Rook)
-    {
-        if (from == 7)
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~WHITE_KING_SIDE);
-        }
-        else if (from == 0)
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~WHITE_QUEEN_SIDE);
-        }
-        else if (from == 63)
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~BLACK_KING_SIDE);
-        }
-        else if (from == 56)
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~BLACK_QUEEN_SIDE);
-        }
-    }
-
-    if (
-        newState.capturedPiece != NO_PIECE &&
-        getPieceType(newState.capturedPiece) == PieceType::Rook
-    )
-    {
-        if (to == 7)
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~WHITE_KING_SIDE);
-        }
-        else if (to == 0)
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~WHITE_QUEEN_SIDE);
-        }
-        else if (to == 63)
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~BLACK_KING_SIDE);
-        }
-        else if (to == 56)
-        {
-            newState.castlingRights &=
-                static_cast<CastlingRights>(~BLACK_QUEEN_SIDE);
-        }
-    }
+    newState.castlingRights &= static_cast<CastlingRights>(
+        CASTLING_RIGHTS_MASKS[from] &
+        CASTLING_RIGHTS_MASKS[to]
+    );
 
     // --------------------------------------------------
     // Update en passant
