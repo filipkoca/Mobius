@@ -335,3 +335,108 @@ void Position::makeMove(Move move, StateInfo& newState)
 
     state = &newState;
 }
+
+void Position::undoMove(Move move, StateInfo &previousState)
+{
+    // decode move
+    Square from = getFromSq(move);
+    Square to = getToSq(move);
+    MoveType moveType = getType(move);
+
+    Piece capturedPiece = state->capturedPiece;
+    sideToMove = sideToMove == Color::White
+        ? Color::Black
+        : Color::White;
+
+    switch (moveType)
+    {
+        case MoveType::Normal:
+        {
+            movePiece(to, from);
+            if (capturedPiece != NO_PIECE)
+            {
+                setPiece(capturedPiece, to);
+            }
+            break;
+        }
+
+        case MoveType::Promotion:
+        {
+            removePiece(to);
+            Piece pawn = makePiece(sideToMove, PieceType::Pawn);
+            setPiece(pawn, from);
+
+            if (capturedPiece != NO_PIECE)
+            {
+                setPiece(capturedPiece, to);
+            }
+
+            break;
+        }
+
+        case MoveType::EnPassant:
+        {
+            movePiece(to, from);
+
+            std::int8_t dir = sideToMove == Color::White ? -1 : 1;
+            Square capturedPieceSquare = to + (8 * dir);
+
+            setPiece(capturedPiece, capturedPieceSquare);
+
+            break;
+        }
+
+
+        case MoveType::Castling:
+        {
+            Square rookFrom;
+            Square rookTo;
+
+            if (sideToMove == Color::White)
+            {
+                if (to == WHITE_KINGSIDE_CASTLE_TO)
+                {
+                    // Undo:
+                    // K: 6 -> 4
+                    // R: 5 -> 7
+                    rookFrom = 5;
+                    rookTo = 7;
+                }
+                else
+                {
+                    // Undo:
+                    // K: 2 -> 4
+                    // R: 3 -> 0
+                    rookFrom = 3;
+                    rookTo = 0;
+                }
+            }
+            else
+            {
+                if (to == BLACK_KINGSIDE_CASTLE_TO)
+                {
+                    // Undo:
+                    // K: 62 -> 60
+                    // R: 61 -> 63
+                    rookFrom = 61;
+                    rookTo = 63;
+                }
+                else
+                {
+                    // Undo:
+                    // K: 58 -> 60
+                    // R: 59 -> 56
+                    rookFrom = 59;
+                    rookTo = 56;
+                }
+            }
+
+            movePiece(to, from);
+            movePiece(rookFrom, rookTo);
+
+            break;
+        }
+    }
+
+    state = &previousState;
+}
