@@ -34,7 +34,9 @@ target_link_libraries(mobius PRIVATE mobius_core)
 # =========================================================
 
 add_executable(mobius_tests
+        tests/test_main.cpp
         tests/core_tests.cpp
+        tests/make_undo_tests.cpp
 )
 
 target_link_libraries(mobius_tests PRIVATE mobius_core)
