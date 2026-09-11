@@ -5,7 +5,7 @@
 ---
 # Chess Engine: *Mobius*
 
-Mobius is a chess engine programmed from the scratch in C++20. 
+Mobius is a chess engine programmed from the scratch in C++20.
 The goal of the project is to create my own serious engine without the use of external
 libraries and sign Mobius up to an official engine chess tournament.
 
@@ -22,9 +22,9 @@ The project does not require any external libraries.
 
 ## Requirements
 
- - C++20 compatable compiler
- - CMake
- - Ninja/Make
+- C++20 compatable compiler
+- CMake
+- Ninja/Make
 
 ## Build
 
@@ -46,37 +46,43 @@ cmake --build cmake-build-release
 
 ### Debug
 
+Build and run:
+
 ```bash
-./cmake-build-debug/mobius
+cmake --build cmake-build-debug --target mobius && ./cmake-build-debug/mobius
 ```
 
 ### Release
 
+Build and run:
+
 ```bash
-./cmake-build-release/mobius
+cmake --build cmake-build-release --target mobius && ./cmake-build-release/mobius
 ```
 
 For engine performance measurements, the `Release` configuration is recommended.
 
 ## Tests
 
-Build the test target:
+Correctness tests use assertions and should be run in the `Debug` configuration.
 
-```bash
-cmake --build cmake-build-debug --target mobius_tests
-```
-
-Run the tests:
-
-```bash
-./cmake-build-debug/mobius_tests
-```
-
-Build and run in one command:
+Build and run all tests:
 
 ```bash
 cmake --build cmake-build-debug --target mobius_tests && ./cmake-build-debug/mobius_tests
 ```
+
+## Benchmarks
+
+Performance benchmarks are kept separate from correctness tests and should be run in the `Release` configuration.
+
+Build and run all benchmarks:
+
+```bash
+cmake --build cmake-build-release --target mobius_benchmarks && ./cmake-build-release/mobius_benchmarks
+```
+
+The make/undo benchmark performs a CPU warm-up before measurement, runs multiple timed samples, and reports median, best, and worst time per `makeMove()` + `undoMove()` pair together with throughput in millions of pairs per second.
 
 ## Documentation
 
