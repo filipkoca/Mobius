@@ -135,7 +135,7 @@ bool Position::isValid() const
 
 void Position::makeMove(Move move, StateInfo& newState)
 {
-    // decode move
+    // Decode move
     Square from = getFromSq(move);
     Square to = getToSq(move);
     MoveType moveType = getType(move);
@@ -143,13 +143,14 @@ void Position::makeMove(Move move, StateInfo& newState)
     Piece movingPiece = board[from];
     PieceType movingType = getPieceType(movingPiece);
 
+    // Copy current reversible state
     newState = *state;
 
     newState.capturedPiece = NO_PIECE;
     newState.enPassantSquare = NO_SQUARE;
 
     // ======================================
-    //  Update physical board
+    // Update physical board
     // ======================================
 
     switch (moveType)
@@ -164,7 +165,15 @@ void Position::makeMove(Move move, StateInfo& newState)
                 removePiece(to);
             }
 
-            movePiece(from, to);
+            // this instead of movePiece -> recalculating known info
+            Bitboard mask = getBit(from) | getBit(to);
+
+            board[from] = NO_PIECE;
+            board[to] = movingPiece;
+
+            typesBB[ALL_PIECES] ^= mask;
+            typesBB[static_cast<std::size_t>(movingType)] ^= mask;
+            colorsBB[static_cast<std::size_t>(sideToMove)] ^= mask;
 
             break;
         }
@@ -188,10 +197,14 @@ void Position::makeMove(Move move, StateInfo& newState)
 
         case MoveType::EnPassant:
         {
-            std::int8_t dir = sideToMove == Color::White ? -1 : 1;
-            Square capturedPieceSquare = to + (8 * dir);
+            std::int8_t dir =
+                sideToMove == Color::White ? -1 : 1;
 
-            newState.capturedPiece = board[capturedPieceSquare];
+            Square capturedPieceSquare =
+                to + (8 * dir);
+
+            newState.capturedPiece =
+                board[capturedPieceSquare];
 
             removePiece(capturedPieceSquare);
             movePiece(from, to);
@@ -213,8 +226,7 @@ void Position::makeMove(Move move, StateInfo& newState)
                     oldRookSquare = 7;
                     newRookSquare = 5;
                 }
-
-                else // to == WHITE_QUEENSIDE_CASTLE_TO
+                else
                 {
                     // K: 4 -> 2
                     // R: 0 -> 3
@@ -222,7 +234,7 @@ void Position::makeMove(Move move, StateInfo& newState)
                     newRookSquare = 3;
                 }
             }
-            else //sideToMove == Color::Black
+            else
             {
                 if (to == BLACK_KINGSIDE_CASTLE_TO)
                 {
@@ -231,8 +243,7 @@ void Position::makeMove(Move move, StateInfo& newState)
                     oldRookSquare = 63;
                     newRookSquare = 61;
                 }
-
-                else // to == BLACK_QUEENSIDE_CASTLE_TO
+                else
                 {
                     // k: 60 -> 58
                     // r: 56 -> 59
@@ -257,9 +268,9 @@ void Position::makeMove(Move move, StateInfo& newState)
         CASTLING_RIGHTS_MASKS[to]
     );
 
-    // --------------------------------------------------
+    // ======================================
     // Update en passant
-    // --------------------------------------------------
+    // ======================================
 
     if (movingType == PieceType::Pawn)
     {
@@ -279,14 +290,14 @@ void Position::makeMove(Move move, StateInfo& newState)
         }
     }
 
-    // --------------------------------------------------
+    // ======================================
     // Update halfmove clock
-    // --------------------------------------------------
+    // ======================================
 
     if (
-       movingType == PieceType::Pawn ||
-       newState.capturedPiece != NO_PIECE
-   )
+        movingType == PieceType::Pawn ||
+        newState.capturedPiece != NO_PIECE
+    )
     {
         newState.halfmoveClock = 0;
     }
@@ -295,9 +306,11 @@ void Position::makeMove(Move move, StateInfo& newState)
         ++newState.halfmoveClock;
     }
 
-    sideToMove = sideToMove == Color::White
-        ? Color::Black
-        : Color::White;
+    // Flip side
+    sideToMove =
+        sideToMove == Color::White
+            ? Color::Black
+            : Color::White;
 
     state = &newState;
 }
