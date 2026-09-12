@@ -1,5 +1,6 @@
 #include "core_tests.h"
 #include "make_undo_tests.h"
+#include "attacks_tests.h"
 
 #include <iostream>
 
@@ -12,6 +13,7 @@ int main()
 
     runCoreTests();
     runMakeUndoTests();
+    runAttackTests();
 
     std::cout << "\n============================\n";
     std::cout << "     ALL TESTS PASSED\n";

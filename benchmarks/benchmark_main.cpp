@@ -1,4 +1,5 @@
 #include "make_undo_benchmark.h"
+#include "sliding_attacks_benchmark.h"
 
 #include <iostream>
 
@@ -10,6 +11,7 @@ int main()
     std::cout << "========================================\n\n";
 
     runMakeUndoBenchmark();
+    runSlidingAttacksBenchmark();
 
     std::cout << "\n========================================\n";
     std::cout << "        BENCHMARKS FINISHED\n";
