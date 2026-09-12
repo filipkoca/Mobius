@@ -31,6 +31,7 @@ target_include_directories(mobius_core PUBLIC
 
 add_executable(mobius
         src/main.cpp
+        src/movegen/move_buffer.h
 )
 
 target_link_libraries(mobius PRIVATE mobius_core)
