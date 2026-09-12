@@ -4,6 +4,7 @@
 
 #include <array>
 #include <cstddef>
+#include <immintrin.h>
 
 constexpr std::size_t COLOR_COUNT = 2;
 constexpr std::size_t SQUARE_COUNT = 64;
@@ -303,4 +304,66 @@ inline Bitboard diagonalAttacksBasic(Square square, Bitboard occupancy) noexcept
     }
 
     return attacks;
+}
+
+constexpr std::size_t ROOK_ATTACK_TABLE_SIZE = 102400;
+constexpr std::size_t BISHOP_ATTACK_TABLE_SIZE = 5248;
+
+struct PextAttackTables
+{
+    std::array<Bitboard, SQUARE_COUNT> rookMasks{};
+    std::array<Bitboard, SQUARE_COUNT> bishopMasks{};
+
+    std::array<std::size_t, SQUARE_COUNT> rookOffsets{};
+    std::array<std::size_t, SQUARE_COUNT> bishopOffsets{};
+
+    std::array<Bitboard, ROOK_ATTACK_TABLE_SIZE> rookAttacks{};
+    std::array<Bitboard, BISHOP_ATTACK_TABLE_SIZE> bishopAttacks{};
+};
+
+
+extern const PextAttackTables PEXT_ATTACKS;
+
+inline Bitboard straightAttacksPext(Square square, Bitboard occupancy) noexcept
+{
+    const Bitboard mask  = PEXT_ATTACKS.rookMasks[square];
+    const std::size_t index = static_cast<std::size_t>(_pext_u64(occupancy, mask));
+
+    return PEXT_ATTACKS.rookAttacks[PEXT_ATTACKS.rookOffsets[square] + index];
+}
+
+
+inline Bitboard diagonalAttacksPext(Square square,Bitboard occupancy) noexcept
+{
+    const Bitboard mask =PEXT_ATTACKS.bishopMasks[square];
+    const auto index = static_cast<std::size_t>(_pext_u64(occupancy, mask));
+
+    return PEXT_ATTACKS.bishopAttacks[PEXT_ATTACKS.bishopOffsets[square] + index];
+}
+
+
+inline Bitboard queenAttacksPext(Square square, Bitboard occupancy) noexcept
+{
+    return
+        straightAttacksPext(square, occupancy) |
+        diagonalAttacksPext(square, occupancy);
+}
+
+inline Bitboard rookAttacks(Square square,Bitboard occupancy) noexcept
+{
+    return straightAttacksPext(square,occupancy);
+}
+
+
+inline Bitboard bishopAttacks(Square square,Bitboard occupancy) noexcept
+{
+    return diagonalAttacksPext(square,occupancy);
+}
+
+
+inline Bitboard queenAttacks(Square square,Bitboard occupancy) noexcept
+{
+    return
+        rookAttacks(square, occupancy) |
+        bishopAttacks(square, occupancy);
 }

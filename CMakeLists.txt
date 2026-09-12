@@ -16,6 +16,7 @@ add_library(mobius_core
         src/core/core.cpp
         src/core/position.cpp
         src/core/fen_parser.cpp
+        src/movegen/attacks.cpp
 )
 
 target_include_directories(mobius_core PUBLIC
@@ -41,6 +42,7 @@ endif()
 
 add_executable(mobius
         src/main.cpp
+        src/movegen/attacks.cpp
 )
 
 target_link_libraries(mobius PRIVATE mobius_core)
