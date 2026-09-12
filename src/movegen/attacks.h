@@ -173,10 +173,10 @@ inline Bitboard straightAttacksBasic(Square square, Bitboard occupancy) noexcept
     const int rank = getRankOf(square);
     const int file = getFileOf(square);
 
-    for (int r = rank + 1; rank < 8; r++)
+    for (int r = rank + 1; r < 8; r++)
     {
         const Square targetSquare =
-            static_cast<Square>(rank * 8 + file);
+            static_cast<Square>(r * 8 + file);
         const Bitboard targetBit = getBit(targetSquare);
         attacks |= targetBit;
 
@@ -237,7 +237,7 @@ inline Bitboard diagonalAttacksBasic(Square square, Bitboard occupancy) noexcept
 
     const int rank = getRankOf(square);
     const int file = getFileOf(square);
-    
+
     for (int r = rank + 1, f = file + 1;
          r < 8 && f < 8;
          ++r, ++f)
