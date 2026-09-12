@@ -165,3 +165,142 @@ inline constexpr auto KING_ATTACKS =
     generateKingAttackTable();
 inline constexpr auto PAWN_ATTACKS =
     generatePawnAttackTable();
+
+inline Bitboard straightAttacksBasic(Square square, Bitboard occupancy) noexcept
+{
+    Bitboard attacks = 0;
+
+    const int rank = getRankOf(square);
+    const int file = getFileOf(square);
+
+    for (int r = rank + 1; rank < 8; r++)
+    {
+        const Square targetSquare =
+            static_cast<Square>(rank * 8 + file);
+        const Bitboard targetBit = getBit(targetSquare);
+        attacks |= targetBit;
+
+        if (occupancy & targetBit)
+        {
+            break;
+        }
+    }
+
+    for (int r = rank - 1; r >= 0; --r)
+    {
+        const Square target =
+            static_cast<Square>(r * 8 + file);
+
+        const Bitboard targetBit = getBit(target);
+        attacks |= targetBit;
+
+        if (occupancy & targetBit)
+        {
+            break;
+        }
+    }
+
+    for (int f = file + 1; f < 8; ++f)
+    {
+        const Square target =
+            static_cast<Square>(rank * 8 + f);
+
+        const Bitboard targetBit = getBit(target);
+        attacks |= targetBit;
+
+        if (occupancy & targetBit)
+        {
+            break;
+        }
+    }
+
+    for (int f = file - 1; f >= 0; --f)
+    {
+        const Square target =
+            static_cast<Square>(rank * 8 + f);
+
+        const Bitboard targetBit = getBit(target);
+        attacks |= targetBit;
+
+        if (occupancy & targetBit)
+        {
+            break;
+        }
+    }
+
+    return attacks;
+}
+
+inline Bitboard diagonalAttacksBasic(Square square, Bitboard occupancy) noexcept
+{
+    Bitboard attacks = 0;
+
+    const int rank = getRankOf(square);
+    const int file = getFileOf(square);
+    
+    for (int r = rank + 1, f = file + 1;
+         r < 8 && f < 8;
+         ++r, ++f)
+    {
+        const Square target =
+            static_cast<Square>(r * 8 + f);
+
+        const Bitboard targetBit = getBit(target);
+        attacks |= targetBit;
+
+        if (occupancy & targetBit)
+        {
+            break;
+        }
+    }
+
+    for (int r = rank + 1, f = file - 1;
+         r < 8 && f >= 0;
+         ++r, --f)
+    {
+        const Square target =
+            static_cast<Square>(r * 8 + f);
+
+        const Bitboard targetBit = getBit(target);
+        attacks |= targetBit;
+
+        if (occupancy & targetBit)
+        {
+            break;
+        }
+    }
+
+    for (int r = rank - 1, f = file + 1;
+         r >= 0 && f < 8;
+         --r, ++f)
+    {
+        const Square target =
+            static_cast<Square>(r * 8 + f);
+
+        const Bitboard targetBit = getBit(target);
+        attacks |= targetBit;
+
+        if (occupancy & targetBit)
+        {
+            break;
+        }
+    }
+
+    for (int r = rank - 1, f = file - 1;
+         r >= 0 && f >= 0;
+         --r, --f)
+    {
+        const Square target =
+            static_cast<Square>(r * 8 + f);
+
+        const Bitboard targetBit = getBit(target);
+        attacks |= targetBit;
+
+        if (occupancy & targetBit)
+        {
+            break;
+        }
+    }
+
+    return attacks;
+}
