@@ -132,7 +132,7 @@ namespace
             }
 
             // The attacking piece itself would normally
-            // be part of the Position occupancy.
+            // be included in Position occupancy.
             occupancy |= getBit(square);
 
             inputs[i].square = square;
@@ -183,7 +183,7 @@ namespace
             std::memory_order_seq_cst
         );
 
-        // Prevent the compiler from removing the work.
+        // Prevent compiler from removing the calculations.
         benchmarkSink = checksum;
 
         const std::chrono::duration<double> elapsed =
@@ -331,22 +331,34 @@ namespace
                     INPUT_MASK
                 ];
 
+
+            // Static attack tables.
             checksum ^=
-                KNIGHT_ATTACKS[input.square];
+                KNIGHT_ATTACKS[
+                    input.square
+                ];
 
             checksum ^=
-                KING_ATTACKS[input.square];
+                KING_ATTACKS[
+                    input.square
+                ];
 
             checksum ^=
                 PAWN_ATTACKS[
-                    static_cast<std::size_t>(Color::White)
+                    static_cast<std::size_t>(
+                        Color::White
+                    )
                 ][input.square];
 
             checksum ^=
                 PAWN_ATTACKS[
-                    static_cast<std::size_t>(Color::Black)
+                    static_cast<std::size_t>(
+                        Color::Black
+                    )
                 ][input.square];
 
+
+            // Basic sliding attacks.
             checksum ^=
                 straightAttacksBasic(
                     input.square,
@@ -358,6 +370,37 @@ namespace
                     input.square,
                     input.occupancy
                 );
+
+            checksum ^=
+                straightAttacksBasic(
+                    input.square,
+                    input.occupancy
+                ) |
+                diagonalAttacksBasic(
+                    input.square,
+                    input.occupancy
+                );
+
+
+            // PEXT sliding attacks.
+            checksum ^=
+                straightAttacksPext(
+                    input.square,
+                    input.occupancy
+                );
+
+            checksum ^=
+                diagonalAttacksPext(
+                    input.square,
+                    input.occupancy
+                );
+
+            checksum ^=
+                queenAttacksPext(
+                    input.square,
+                    input.occupancy
+                );
+
 
             ++iterations;
 
@@ -383,8 +426,8 @@ namespace
 
         std::cout
             << "Warm-up complete ("
-            << iterations * 6
-            << " attack calls).\n\n";
+            << iterations * 10
+            << " requested attack calls).\n\n";
     }
 
 
@@ -398,7 +441,7 @@ namespace
 
         std::cout
             << std::left
-            << std::setw(18)
+            << std::setw(20)
             << name
 
             << std::right
@@ -427,16 +470,19 @@ void runSlidingAttacksBenchmark()
     const std::array<AttackInput, INPUT_COUNT> inputs =
         generateInputs();
 
+
     std::cout
         << "\n========================================\n"
         << "        MOBIUS ATTACK BENCHMARK\n"
         << "========================================\n\n";
 
+
     warmUp(inputs);
+
 
     std::cout
         << std::left
-        << std::setw(18)
+        << std::setw(20)
         << "Case"
 
         << std::right
@@ -454,8 +500,9 @@ void runSlidingAttacksBenchmark()
 
         << '\n';
 
+
     std::cout
-        << std::string(68, '-')
+        << std::string(70, '-')
         << '\n';
 
 
@@ -555,11 +602,16 @@ void runSlidingAttacksBenchmark()
     );
 
 
+    std::cout
+        << std::string(70, '-')
+        << '\n';
+
+
     // =====================================================
-    // STRAIGHT / ROOK
+    // STRAIGHT BASIC
     // =====================================================
 
-    const BenchmarkResult straightResult =
+    const BenchmarkResult straightBasicResult =
         benchmarkFunction(
             inputs,
             [](
@@ -576,15 +628,45 @@ void runSlidingAttacksBenchmark()
 
     printResult(
         "Straight basic",
-        straightResult
+        straightBasicResult
     );
 
 
     // =====================================================
-    // DIAGONAL / BISHOP
+    // STRAIGHT PEXT
     // =====================================================
 
-    const BenchmarkResult diagonalResult =
+    const BenchmarkResult straightPextResult =
+        benchmarkFunction(
+            inputs,
+            [](
+                Square square,
+                Bitboard occupancy
+            ) noexcept
+            {
+                return straightAttacksPext(
+                    square,
+                    occupancy
+                );
+            }
+        );
+
+    printResult(
+        "Straight PEXT",
+        straightPextResult
+    );
+
+
+    std::cout
+        << std::string(70, '-')
+        << '\n';
+
+
+    // =====================================================
+    // DIAGONAL BASIC
+    // =====================================================
+
+    const BenchmarkResult diagonalBasicResult =
         benchmarkFunction(
             inputs,
             [](
@@ -601,15 +683,45 @@ void runSlidingAttacksBenchmark()
 
     printResult(
         "Diagonal basic",
-        diagonalResult
+        diagonalBasicResult
     );
 
 
     // =====================================================
-    // QUEEN
+    // DIAGONAL PEXT
     // =====================================================
 
-    const BenchmarkResult queenResult =
+    const BenchmarkResult diagonalPextResult =
+        benchmarkFunction(
+            inputs,
+            [](
+                Square square,
+                Bitboard occupancy
+            ) noexcept
+            {
+                return diagonalAttacksPext(
+                    square,
+                    occupancy
+                );
+            }
+        );
+
+    printResult(
+        "Diagonal PEXT",
+        diagonalPextResult
+    );
+
+
+    std::cout
+        << std::string(70, '-')
+        << '\n';
+
+
+    // =====================================================
+    // QUEEN BASIC
+    // =====================================================
+
+    const BenchmarkResult queenBasicResult =
         benchmarkFunction(
             inputs,
             [](
@@ -631,12 +743,75 @@ void runSlidingAttacksBenchmark()
 
     printResult(
         "Queen basic",
-        queenResult
+        queenBasicResult
+    );
+
+
+    // =====================================================
+    // QUEEN PEXT
+    // =====================================================
+
+    const BenchmarkResult queenPextResult =
+        benchmarkFunction(
+            inputs,
+            [](
+                Square square,
+                Bitboard occupancy
+            ) noexcept
+            {
+                return queenAttacksPext(
+                    square,
+                    occupancy
+                );
+            }
+        );
+
+    printResult(
+        "Queen PEXT",
+        queenPextResult
     );
 
 
     std::cout
-        << std::string(68, '-')
-        << '\n'
-        << "One operation = one requested attack bitboard.\n";
+        << std::string(70, '-')
+        << '\n';
+
+
+    // =====================================================
+    // SPEEDUPS
+    // =====================================================
+
+    const double straightSpeedup =
+        straightBasicResult.medianNs /
+        straightPextResult.medianNs;
+
+    const double diagonalSpeedup =
+        diagonalBasicResult.medianNs /
+        diagonalPextResult.medianNs;
+
+    const double queenSpeedup =
+        queenBasicResult.medianNs /
+        queenPextResult.medianNs;
+
+
+    std::cout
+        << "\nPEXT speedup:\n"
+
+        << "  Straight: "
+        << std::fixed
+        << std::setprecision(2)
+        << straightSpeedup
+        << "x\n"
+
+        << "  Diagonal: "
+        << diagonalSpeedup
+        << "x\n"
+
+        << "  Queen:    "
+        << queenSpeedup
+        << "x\n";
+
+
+    std::cout
+        << "\nOne operation = one requested attack bitboard.\n";
 }
