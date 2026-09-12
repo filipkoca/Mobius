@@ -24,17 +24,6 @@ target_include_directories(mobius_core PUBLIC
         ${CMAKE_SOURCE_DIR}/src/movegen
 )
 
-# Release builds are compiled for the current CPU.
-# CMake Release already supplies normal optimization flags.
-if (
-        CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-        OR CMAKE_CXX_COMPILER_ID MATCHES "Clang"
-)
-    target_compile_options(mobius_core PRIVATE
-            $<$<CONFIG:Release>:-march=native>
-    )
-endif()
-
 
 # =========================================================
 # MAIN ENGINE
@@ -42,19 +31,9 @@ endif()
 
 add_executable(mobius
         src/main.cpp
-        src/movegen/attacks.cpp
 )
 
 target_link_libraries(mobius PRIVATE mobius_core)
-
-if (
-        CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
-        OR CMAKE_CXX_COMPILER_ID MATCHES "Clang"
-)
-    target_compile_options(mobius PRIVATE
-            $<$<CONFIG:Release>:-march=native>
-    )
-endif()
 
 
 # =========================================================
@@ -68,6 +47,7 @@ add_executable(mobius_tests
         tests/core_tests.cpp
         tests/make_undo_tests.cpp
         tests/attacks_tests.cpp
+        tests/attack_detector_tests.cpp
 )
 
 target_link_libraries(mobius_tests PRIVATE mobius_core)
@@ -75,6 +55,11 @@ target_link_libraries(mobius_tests PRIVATE mobius_core)
 add_test(
         NAME mobius_tests
         COMMAND mobius_tests
+)
+
+set_tests_properties(
+        mobius_tests
+        PROPERTIES TIMEOUT 10
 )
 
 
@@ -86,18 +71,34 @@ add_executable(mobius_benchmarks
         benchmarks/benchmark_main.cpp
         benchmarks/make_undo_benchmark.cpp
         benchmarks/sliding_attacks_benchmark.cpp
+        benchmarks/attack_detector_benchmark.cpp
 )
 
 target_link_libraries(mobius_benchmarks PRIVATE mobius_core)
 
-# Important:
-# attacks.h contains inline/header-only hot-path code.
-# Therefore the benchmark executable itself must also
-# be compiled with native CPU optimizations.
+
+# =========================================================
+# NATIVE RELEASE OPTIMIZATION
+# =========================================================
+
+# PEXT is used from inline functions in attacks.h, so every target that
+# includes those functions should receive -march=native in Release mode.
 if (
         CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
         OR CMAKE_CXX_COMPILER_ID MATCHES "Clang"
 )
+    target_compile_options(mobius_core PRIVATE
+            $<$<CONFIG:Release>:-march=native>
+    )
+
+    target_compile_options(mobius PRIVATE
+            $<$<CONFIG:Release>:-march=native>
+    )
+
+    target_compile_options(mobius_tests PRIVATE
+            $<$<CONFIG:Release>:-march=native>
+    )
+
     target_compile_options(mobius_benchmarks PRIVATE
             $<$<CONFIG:Release>:-march=native>
     )

@@ -1,3 +1,4 @@
+#include "attack_detector_benchmark.h"
 #include "make_undo_benchmark.h"
 #include "sliding_attacks_benchmark.h"
 
@@ -11,7 +12,12 @@ int main()
     std::cout << "========================================\n\n";
 
     runMakeUndoBenchmark();
+    std::cout << '\n';
+
     runSlidingAttacksBenchmark();
+    std::cout << '\n';
+
+    runAttackDetectorBenchmark();
 
     std::cout << "\n========================================\n";
     std::cout << "        BENCHMARKS FINISHED\n";
